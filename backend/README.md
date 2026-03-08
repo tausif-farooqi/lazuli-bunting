@@ -1,5 +1,14 @@
 # Lazuli Bunting API
 
+Uses the **Supabase REST/PostgREST** client (no direct Postgres connection or connection pooling).
+
+## Environment
+
+In `.env` (repo root) set:
+
+- **SUPABASE_URL** — Project URL (e.g. `https://xxxx.supabase.co`)
+- **SUPABASE_SERVICE_KEY** or **SUPABASE_ANON_KEY** — Project API key (Settings → API in Supabase dashboard)
+
 ## Run
 
 From repo root (so `.env` is found):
