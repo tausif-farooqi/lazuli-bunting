@@ -9,6 +9,19 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import Any
 
+# Avoid PermissionError on Windows: asyncpg reads SSLKEYLOGFILE and sets
+# ssl.keylog_filename, which can point at an unwritable volume path. Unset it
+# so no keylog file is used (Supabase connection works without it).
+os.environ.pop("SSLKEYLOGFILE", None)
+
+# Optional: use a writable cwd for any other lib that writes to the current dir.
+if os.name == "nt":
+    _safe_cwd = os.environ.get("TEMP") or os.path.expanduser("~")
+    try:
+        os.chdir(_safe_cwd)
+    except OSError:
+        pass
+
 from dotenv import load_dotenv
 import asyncpg
 from fastapi import FastAPI, Query
