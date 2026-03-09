@@ -101,6 +101,50 @@ def get_predictions(
         })
     return results
 
+# --- Phase 3: Annual summaries and stats ---
+
+@app.get("/api/stats/annualsummary")
+def get_annual_summary() -> list[dict[str, Any]]:
+    """Returns yearly sighting totals. No parameters. Calls get_annual_sightings_summary()."""
+    supabase = _get_supabase()
+    try:
+        response = supabase.rpc("get_annual_sightings_summary").execute()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
+    rows = response.data or []
+    return [{"obs_year": row.get("obs_year"), "total_sightings": row.get("total_sightings")} for row in rows]
+
+
+@app.get("/api/stats/state")
+def get_state_stats(year: int = Query(..., description="Year (e.g. 2024)")) -> list[dict[str, Any]]:
+    """Returns state-level sighting counts for the given year. Calls get_state_stats_by_year()."""
+    supabase = _get_supabase()
+    try:
+        response = supabase.rpc("get_state_stats_by_year", {"target_year": year}).execute()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
+    rows = response.data or []
+    return [{"state": row.get("state"), "total_sightings": row.get("total_sightings")} for row in rows]
+
+
+@app.get("/api/stats/counties")
+def get_county_stats(
+    state: str = Query(..., description="State code or name (e.g. CA)"),
+    year: int = Query(..., description="Year (e.g. 2024)"),
+) -> list[dict[str, Any]]:
+    """Returns county-level sighting counts for the given state and year. Calls get_county_stats_by_state_year()."""
+    supabase = _get_supabase()
+    try:
+        response = supabase.rpc(
+            "get_county_stats_by_state_year",
+            {"target_state": state, "target_year": year},
+        ).execute()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
+    rows = response.data or []
+    return [{"county": row.get("county"), "total_sightings": row.get("total_sightings")} for row in rows]
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}

@@ -153,3 +153,76 @@ GRANT EXECUTE ON FUNCTION public.get_seasonal_hotspots(double precision, double 
 GRANT EXECUTE ON FUNCTION public.get_seasonal_hotspots(double precision, double precision, integer, double precision, integer) TO postgres;
 
 GRANT EXECUTE ON FUNCTION public.get_seasonal_hotspots(double precision, double precision, integer, double precision, integer) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.get_annual_sightings_summary()
+RETURNS TABLE(obs_year integer, total_sightings bigint) 
+LANGUAGE 'plpgsql'
+COST 100
+VOLATILE PARALLEL SAFE
+ROWS 100
+SET search_path = public, extensions
+AS $BODY$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        EXTRACT(YEAR FROM s.observation_date)::integer AS obs_year,
+        COUNT(*)::bigint AS total_sightings
+    FROM public.lazuli_bunting s
+    GROUP BY obs_year
+    ORDER BY obs_year DESC;
+END;
+$BODY$;
+
+-- Grant permissions for API access
+GRANT EXECUTE ON FUNCTION public.get_annual_sightings_summary TO anon, authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.get_state_stats_by_year(target_year integer)
+RETURNS TABLE(state text, total_sightings bigint) 
+LANGUAGE 'plpgsql'
+COST 100
+VOLATILE PARALLEL SAFE
+ROWS 50
+SET search_path = public, extensions
+AS $BODY$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.state::text,
+        COUNT(*)::bigint AS total_sightings
+    FROM public.lazuli_bunting s
+    WHERE EXTRACT(YEAR FROM s.observation_date) = target_year
+    GROUP BY s.state
+    ORDER BY total_sightings DESC;
+END;
+$BODY$;
+
+-- Grant permissions for API access (Essential for Supabase REST API)
+GRANT EXECUTE ON FUNCTION public.get_state_stats_by_year TO anon, authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.get_county_stats_by_state_year(
+    target_state text,
+    target_year integer
+)
+RETURNS TABLE(county text, total_sightings bigint) 
+LANGUAGE 'plpgsql'
+COST 100
+VOLATILE PARALLEL SAFE
+ROWS 100
+SET search_path = public, extensions
+AS $BODY$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.county::text,
+        COUNT(*)::bigint AS total_sightings
+    FROM public.lazuli_bunting s
+    WHERE 
+        s.state = target_state 
+        AND EXTRACT(YEAR FROM s.observation_date) = target_year
+    GROUP BY s.county
+    ORDER BY total_sightings DESC;
+END;
+$BODY$;
+
+-- Essential permissions for the Supabase REST API
+GRANT EXECUTE ON FUNCTION public.get_county_stats_by_state_year TO anon, authenticated, service_role;
