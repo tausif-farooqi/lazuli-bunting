@@ -6,6 +6,18 @@ import re
 from pathlib import Path
 from typing import Any
 
+# Avoid PermissionError on Windows: Python's ssl module (used by httpx/Supabase)
+# sets keylog_filename when SSLKEYLOGFILE is set, which can point at an unwritable path.
+os.environ.pop("SSLKEYLOGFILE", None)
+
+# Optional: use a writable cwd on Windows for libs that write to the current dir.
+if os.name == "nt":
+    _safe_cwd = os.environ.get("TEMP") or os.path.expanduser("~")
+    try:
+        os.chdir(_safe_cwd)
+    except OSError:
+        pass
+
 from dotenv import load_dotenv
 from supabase import create_client, Client
 from fastapi import FastAPI, Query, HTTPException
