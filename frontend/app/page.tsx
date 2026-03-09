@@ -185,7 +185,9 @@ export default function Home() {
                 </h3>
                 <p className="mt-3 max-w-sm text-muted-foreground">
                   Enter your location and search parameters to discover the best
-                  spots for observing these beautiful songbirds in your area.
+                  spots for observing these beautiful songbirds in your area. The 
+                  results are based on historical eBird observations of Lazuli Buntings
+                  from 2016 to 2026.
                 </p>
                 <div className="mt-6 flex flex-wrap justify-center gap-2">
                   <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-medium text-sky-700">

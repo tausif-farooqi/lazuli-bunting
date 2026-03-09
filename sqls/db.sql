@@ -72,42 +72,84 @@ CREATE INDEX IF NOT EXISTS idx_lazuli_observation_month
     WITH (fillfactor=100, deduplicate_items=True)
     TABLESPACE pg_default;
 
-CREATE OR REPLACE FUNCTION get_seasonal_hotspots(
-    user_lat FLOAT, 
-    user_lon FLOAT, 
-    target_month INT, 
-    radius_miles FLOAT DEFAULT 10.0,
-    years_limit INT DEFAULT 5
-)
-RETURNS TABLE (
-    locality TEXT,
-    location_full TEXT, -- New: Concatenated County, State
-    distance_miles NUMERIC,
-    total_sightings BIGINT,
-    years_present BIGINT,
-    reliability_score NUMERIC
-) AS $$
+CREATE OR REPLACE FUNCTION public.get_seasonal_hotspots(
+    user_lat double precision,
+    user_lon double precision,
+    target_month integer,
+    radius_miles double precision DEFAULT 10.0,
+    years_limit integer DEFAULT 5)
+    RETURNS TABLE(
+        locality text, 
+        location_full text, 
+        distance_miles numeric, 
+        total_sightings bigint, 
+        years_present bigint, 
+        reliability_score numeric
+    ) 
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+    SET search_path=public, extensions
+AS $BODY$
 BEGIN
     RETURN QUERY
+    WITH sightings_with_weights AS (
+        -- 1. Apply a decay weight to each sighting based on how many years ago it occurred.
+        -- 2026 (current year) = 1.0, 2025 = 0.8, 2024 = 0.64, etc.
+        SELECT 
+            s.locality,
+            s.county,
+            s.state,
+            s.geom,
+            s.observation_date,
+            POWER(0.8, EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM s.observation_date)) as recency_weight
+        FROM public.lazuli_bunting s
+        WHERE 
+            s.observation_date >= (CURRENT_DATE - (years_limit || ' years')::interval)
+            AND EXTRACT(MONTH FROM s.observation_date) = target_month
+            AND ST_DWithin(
+                s.geom, 
+                ST_SetSRID(ST_MakePoint(user_lon, user_lat), 4326)::geography, 
+                radius_miles * 1609.34
+            )
+    )
     SELECT 
-        s.locality::TEXT,
-        -- Concatenate County and State (e.g., "Alameda, CA")
-        (MAX(s.county) || ', ' || MAX(s.state))::TEXT as location_full,
-        ROUND((ST_Distance(s.geom, ST_SetSRID(ST_MakePoint(user_lon, user_lat), 4326)::geography) / 1609.34)::numeric, 2) as distance_miles,
-        COUNT(*) as total_sightings,
-        COUNT(DISTINCT EXTRACT(YEAR FROM s.observation_date)) as years_present,
-        -- Weighted Reliability Score
+        sw.locality::TEXT,
+        (MAX(sw.county) || ', ' || MAX(sw.state))::TEXT as location_full,
         ROUND(
-            (COUNT(*) * 0.4) + 
-            (COUNT(DISTINCT EXTRACT(YEAR FROM s.observation_date)) * 10 * 0.6), 
+            (ST_Distance(
+                sw.geom, 
+                ST_SetSRID(ST_MakePoint(user_lon, user_lat), 4326)::geography
+            ) / 1609.34)::numeric, 
             2
-        ) as reliability_score
-    FROM public.lazuli_bunting s
-    WHERE 
-        s.observation_date >= (CURRENT_DATE - (years_limit || ' years')::interval)
-        AND EXTRACT(MONTH FROM s.observation_date) = target_month
-        AND ST_DWithin(s.geom, ST_SetSRID(ST_MakePoint(user_lon, user_lat), 4326)::geography, radius_miles * 1609.34)
-    GROUP BY s.locality, s.geom
-    ORDER BY reliability_score DESC;
+        ) as distance_miles,
+        COUNT(*) as total_sightings,
+        COUNT(DISTINCT EXTRACT(YEAR FROM sw.observation_date)) as years_present,
+        -- 2. New Weighted Score:
+        -- (Sum of weights * 5) adds volume but favors recent years.
+        -- (Years present * 10) rewards consistent annual return.
+        -- Capped at 100.0.
+        LEAST(100.0, ROUND(
+            (SUM(sw.recency_weight) * 5) + 
+            (COUNT(DISTINCT EXTRACT(YEAR FROM sw.observation_date)) * 10), 
+            2
+        ))::numeric as reliability_score
+    FROM sightings_with_weights sw
+    GROUP BY sw.locality, sw.geom
+    ORDER BY reliability_score DESC, distance_miles ASC;
 END;
-$$ LANGUAGE plpgsql;
+$BODY$;
+
+ALTER FUNCTION public.get_seasonal_hotspots(double precision, double precision, integer, double precision, integer)
+    OWNER TO postgres;
+
+GRANT EXECUTE ON FUNCTION public.get_seasonal_hotspots(double precision, double precision, integer, double precision, integer) TO PUBLIC;
+
+GRANT EXECUTE ON FUNCTION public.get_seasonal_hotspots(double precision, double precision, integer, double precision, integer) TO anon;
+
+GRANT EXECUTE ON FUNCTION public.get_seasonal_hotspots(double precision, double precision, integer, double precision, integer) TO authenticated;
+
+GRANT EXECUTE ON FUNCTION public.get_seasonal_hotspots(double precision, double precision, integer, double precision, integer) TO postgres;
+
+GRANT EXECUTE ON FUNCTION public.get_seasonal_hotspots(double precision, double precision, integer, double precision, integer) TO service_role;
