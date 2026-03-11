@@ -15,7 +15,7 @@ export function SiteNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-row items-center gap-1">
+    <nav className="flex flex-col items-stretch gap-1 sm:flex-row sm:items-center">
       {navLinks.map(({ href, label, icon: Icon }) => {
         const isActive =
           pathname === href ||
