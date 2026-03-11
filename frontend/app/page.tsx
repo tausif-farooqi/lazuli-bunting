@@ -7,6 +7,7 @@ import { BirdInfoCard } from "@/components/bird-info-card";
 import { usePredictions } from "@/hooks/use-predictions";
 import { toast } from "@/hooks/use-toast";
 import { Bird, Search, MapPin, Binoculars } from "lucide-react";
+import { SiteNav } from "@/components/site-nav";
 import Image from "next/image";
 
 export default function Home() {
@@ -65,19 +66,22 @@ export default function Home() {
       </div>
       {/* Header */}
       <header className="relative z-10 bg-black">
-        <div className="mx-auto max-w-6xl px-4 py-6">
-          <div className="flex flex-col items-center justify-center gap-3 text-center">
-            <div className="rounded-2xl bg-white/10 p-3 ring-1 ring-white/20">
-              <Bird className="h-8 w-8 text-white" />
+        <div className="mx-auto max-w-6xl px-4 py-4">
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-white/10 p-3 ring-1 ring-white/20">
+                <Bird className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white md:text-2xl">
+                  Lazuli Bunting Finder
+                </h1>
+                <p className="text-sm text-gray-400">
+                  Predict sighting locations across North America
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white md:text-3xl">
-                Lazuli Bunting Finder
-              </h1>
-              <p className="mt-1 text-gray-400">
-                Predict sighting locations across North America
-              </p>
-            </div>
+            <SiteNav />
           </div>
         </div>
       </header>

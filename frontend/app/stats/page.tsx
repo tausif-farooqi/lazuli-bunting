@@ -18,6 +18,7 @@ import {
 import type { ChartConfig } from "@/components/ui/chart";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BarChart2, Map, MapPin, Bird } from "lucide-react";
+import { SiteNav } from "@/components/site-nav";
 import {
   useAnnualSummary,
   useStateStats,
@@ -315,20 +316,22 @@ function StatsContent() {
 
       {/* Page header */}
       <header className="relative z-10 bg-black">
-        <div className="mx-auto max-w-6xl px-4 py-6">
-          <div className="flex flex-col items-center justify-center gap-3 text-center">
-            <div className="rounded-2xl bg-white/10 p-3 ring-1 ring-white/20">
-              <BarChart2 className="h-8 w-8 text-white" />
+        <div className="mx-auto max-w-6xl px-4 py-4">
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-white/10 p-3 ring-1 ring-white/20">
+                <BarChart2 className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white md:text-2xl">
+                  Sightings Dashboard
+                </h1>
+                <p className="text-sm text-gray-400">
+                  Explore historical eBird observations — drill down by year, state, and county
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white md:text-3xl">
-                Sightings Dashboard
-              </h1>
-              <p className="mt-1 text-gray-400">
-                Explore historical eBird observations — drill down by year, state,
-                and county
-              </p>
-            </div>
+            <SiteNav />
           </div>
         </div>
       </header>
