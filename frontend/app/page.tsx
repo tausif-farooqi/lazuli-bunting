@@ -15,6 +15,7 @@ export default function Home() {
   const { getPredictions, results, isLoading } = usePredictions();
 
   const handleSubmit = async (data: {
+    radiusMiles: number;
     years: number;
     month: number;
     latitude: number;
@@ -27,6 +28,7 @@ export default function Home() {
         longitude: data.longitude,
         month: data.month,
         years: data.years,
+        radiusMiles: data.radiusMiles,
       });
       setHasSearched(true);
       if (predictions.length === 0) {

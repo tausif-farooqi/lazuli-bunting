@@ -12,10 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapPin, Navigation, Calendar, Clock } from "lucide-react";
+import { MapPin, Navigation, Calendar, Ruler } from "lucide-react";
 
 interface PredictionFormProps {
   onSubmit: (data: {
+    radiusMiles: number;
     years: number;
     month: number;
     latitude: number;
@@ -39,9 +40,11 @@ const months = [
   { value: "12", label: "December" },
 ];
 
+const DEFAULT_YEARS = 5;
+
 export function PredictionForm({ onSubmit, isLoading }: PredictionFormProps) {
   const currentMonth = new Date().getMonth() + 1;
-  const [years, setYears] = useState(5);
+  const [radiusMiles, setRadiusMiles] = useState(10);
   const [month, setMonth] = useState(currentMonth.toString());
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
@@ -86,7 +89,8 @@ export function PredictionForm({ onSubmit, isLoading }: PredictionFormProps) {
     }
 
     onSubmit({
-      years,
+      radiusMiles,
+      years: DEFAULT_YEARS,
       month: parseInt(month),
       latitude: lat,
       longitude: lon,
@@ -95,27 +99,27 @@ export function PredictionForm({ onSubmit, isLoading }: PredictionFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Years Slider */}
+      {/* Distance (radius) Slider */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Label className="flex items-center gap-2 text-foreground">
-            <Clock className="h-4 w-4 text-primary" />
-            Historical Data Range
+            <Ruler className="h-4 w-4 text-primary" />
+            Search radius
           </Label>
           <span className="text-sm font-medium text-primary">
-            {years} {years === 1 ? "year" : "years"}
+            {radiusMiles} {radiusMiles === 1 ? "mile" : "miles"}
           </span>
         </div>
         <Slider
-          value={[years]}
-          onValueChange={(value) => setYears(value[0])}
+          value={[radiusMiles]}
+          onValueChange={(value) => setRadiusMiles(value[0])}
           min={1}
-          max={10}
+          max={30}
           step={1}
           className="w-full"
         />
         <p className="text-xs text-muted-foreground">
-          More years provides larger sample size but may include outdated patterns
+          Search for hotspots within this distance of your location
         </p>
       </div>
 
