@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bird, BarChart2, Trophy } from "lucide-react";
+import { Bird, BarChart2, Trophy, Radio } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/", label: "Predictions", icon: Bird },
   { href: "/stats", label: "Stats", icon: BarChart2 },
   { href: "/top-parks", label: "Top Parks", icon: Trophy },
+  { href: "/live", label: "Live Sightings", icon: Radio },
 ];
 
 export function SiteNav() {
@@ -20,7 +21,8 @@ export function SiteNav() {
         const isActive =
           pathname === href ||
           (href === "/stats" && pathname.startsWith("/stats")) ||
-          (href === "/top-parks" && pathname.startsWith("/top-parks"));
+          (href === "/top-parks" && pathname.startsWith("/top-parks")) ||
+          (href === "/live" && pathname.startsWith("/live"));
 
         return (
           <Link
