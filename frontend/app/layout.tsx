@@ -20,9 +20,9 @@ export const metadata: Metadata = {
     siteName: 'Lazuli Bunting',
       images: [
         {
-          url: '/images/lazuli-bunting.jpg',
-          width: 1200,
-          height: 630,
+          url: '/images/lazuli-bunting-2.jpg',
+          width: 960,
+          height: 640,
           alt: 'Lazuli Bunting — a vibrant blue songbird with turquoise-blue plumage and orange-rust breast',
         },
       ],
