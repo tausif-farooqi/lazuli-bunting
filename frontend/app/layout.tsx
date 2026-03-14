@@ -7,9 +7,34 @@ import './globals.css'
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
+const siteUrl = 'https://lazulibunting.com';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: 'Lazuli Bunting',
   description: 'Predict sighting locations for Lazuli Buntings across North America',
+  openGraph: {
+    title: 'Lazuli Bunting',
+    description: 'Predict sighting locations for Lazuli Buntings across North America',
+    url: siteUrl,
+    siteName: 'Lazuli Bunting',
+    images: [
+      {
+        url: '/images/lazuli-bunting-hero.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Lazuli Bunting — a vibrant blue songbird perched in the wild',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lazuli Bunting',
+    description: 'Predict sighting locations for Lazuli Buntings across North America',
+    images: ['/images/lazuli-bunting-hero.jpg'],
+  },
   icons: {
     icon: [
       {
