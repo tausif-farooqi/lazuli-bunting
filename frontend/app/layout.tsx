@@ -18,14 +18,14 @@ export const metadata: Metadata = {
     description: 'Predict sighting locations for Lazuli Buntings across North America',
     url: siteUrl,
     siteName: 'Lazuli Bunting',
-    images: [
-      {
-        url: '/images/lazuli-bunting-hero.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Lazuli Bunting — a vibrant blue songbird perched in the wild',
-      },
-    ],
+      images: [
+        {
+          url: '/images/lazuli-bunting.jpg',
+          width: 1200,
+          height: 630,
+          alt: 'Lazuli Bunting — a vibrant blue songbird with turquoise-blue plumage and orange-rust breast',
+        },
+      ],
     locale: 'en_US',
     type: 'website',
   },
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Lazuli Bunting',
     description: 'Predict sighting locations for Lazuli Buntings across North America',
-    images: ['/images/lazuli-bunting-hero.jpg'],
+    images: ['/images/lazuli-bunting.jpg'],
   },
   icons: {
     icon: [
