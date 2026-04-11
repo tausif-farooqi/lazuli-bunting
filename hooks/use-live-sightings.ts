@@ -2,10 +2,9 @@
 
 import { useState, useCallback } from "react";
 
-const API_BASE =
-  typeof window !== "undefined"
-    ? (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
-    : "http://localhost:8000";
+import { getApiBaseUrl } from "@/lib/api-base";
+
+const API_BASE = getApiBaseUrl();
 
 export interface LiveSighting {
   location: string;

@@ -1,14 +1,14 @@
 # Role: Lead Architect & Full-Stack Developer for Lazuli Bunting Tracker
 
-## Monorepo Structure
-- `/frontend`: Next.js App Router (TypeScript, Tailwind, Shadcn UI).
-- `/backend`: Python FastAPI.
-- `/database`: Supabase (Postgres/PostGIS).
+## Repository Structure
+- **Next.js app (repo root):** App Router (TypeScript, Tailwind, Shadcn UI).
+- **Backend API:** Separate repository (FastAPI); consumed via `NEXT_PUBLIC_API_URL`.
+- **Database:** Supabase (Postgres/PostGIS).
 
 ## Frontend Guidelines
 - **Package Manager:** Strictly use `pnpm`. Do not run `npm` or `yarn` commands.
-- **UI Library:** The project uses a comprehensive Shadcn UI setup in `frontend/components/ui/`. Do not install new component libraries; use what is there.
-- **State & Data:** The app currently relies on `frontend/lib/mock-sightings.ts`. All new data fetching must replace this mock data with live calls to the backend API using `React Query` (TanStack) or native `fetch`.
+- **UI Library:** The project uses a comprehensive Shadcn UI setup in `components/ui/`. Do not install new component libraries; use what is there.
+- **State & Data:** The app currently relies on `lib/mock-sightings.ts` where mocks remain. All new data fetching must replace mock data with live calls to the backend API using `React Query` (TanStack) or native `fetch`.
 - **Core UI Flow:** Data inputs originate in `prediction-form.tsx` and are displayed in `results-list.tsx`.
 - **Styling:** Use standard Tailwind utility classes and the `cn()` utility from `lib/utils.ts`.
 
