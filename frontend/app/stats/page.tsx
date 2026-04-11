@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BarChart2, Map, MapPin, Bird } from "lucide-react";
+import { ArrowLeft, BarChart2, Map, MapPin, Bird, RefreshCw } from "lucide-react";
 import { SiteNav } from "@/components/site-nav";
 import {
   useAnnualSummary,
@@ -52,10 +52,33 @@ function LoadingState({ message = "Loading data…" }: { message?: string }) {
   );
 }
 
-function ErrorState({ message }: { message: string }) {
+function ErrorState({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry?: () => void;
+}) {
   return (
-    <div className="flex h-48 flex-col items-center justify-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center">
-      <p className="font-medium text-destructive">Failed to load data</p>
+    <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center">
+      <div className="space-y-2">
+        <p className="font-medium text-destructive">Failed to load data</p>
+        <p className="max-w-sm text-sm text-muted-foreground">{message}</p>
+      </div>
+      {onRetry ? (
+        <Button type="button" variant="default" size="sm" onClick={onRetry}>
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Retry
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+function EmptyDataState({ message }: { message: string }) {
+  return (
+    <div className="flex min-h-64 flex-col items-center justify-center gap-2 rounded-xl border border-border bg-muted/30 p-8 text-center">
+      <p className="font-medium text-foreground">No data</p>
       <p className="max-w-sm text-sm text-muted-foreground">{message}</p>
     </div>
   );
@@ -75,8 +98,8 @@ function AnnualSummaryChart({
   }, [load]);
 
   if (isLoading) return <LoadingState message="Loading annual sightings data…" />;
-  if (error) return <ErrorState message={error} />;
-  if (!data.length) return <ErrorState message="No annual data available." />;
+  if (error) return <ErrorState message={error} onRetry={() => load()} />;
+  if (!data.length) return <EmptyDataState message="No annual data available." />;
 
   return (
     <div className="space-y-3">
@@ -134,8 +157,9 @@ function StateChart({
   const chartHeight = Math.max(320, data.length * 40);
 
   if (isLoading) return <LoadingState message={`Loading state data for ${year}…`} />;
-  if (error) return <ErrorState message={error} />;
-  if (!data.length) return <ErrorState message={`No state data available for ${year}.`} />;
+  if (error) return <ErrorState message={error} onRetry={() => load(year)} />;
+  if (!data.length)
+    return <EmptyDataState message={`No state data available for ${year}.`} />;
 
   return (
     <div className="space-y-3">
@@ -202,9 +226,13 @@ function CountyChart({ state, year }: { state: string; year: number }) {
 
   if (isLoading)
     return <LoadingState message={`Loading county data for ${state}, ${year}…`} />;
-  if (error) return <ErrorState message={error} />;
+  if (error) return <ErrorState message={error} onRetry={() => load(state, year)} />;
   if (!data.length)
-    return <ErrorState message={`No county data found for ${state} in ${year}.`} />;
+    return (
+      <EmptyDataState
+        message={`No county data found for ${state} in ${year}.`}
+      />
+    );
 
   return (
     <div className="space-y-3">
