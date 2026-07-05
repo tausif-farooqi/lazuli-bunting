@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Crown, Binoculars, Radio } from "lucide-react";
 import Image from "next/image";
 import { SiteNav } from "@/components/site-nav";
+import { BirdSpinner } from "@/components/bird-spinner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -67,12 +68,14 @@ function StatusCard({ sighting, index }: { sighting: LiveSighting; index: number
         </span>
       </div>
 
-      {/* Center: location + county */}
+      {/* Center: location + city, county, state */}
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-bold leading-tight text-foreground">
           {sighting.location}
         </p>
-        <p className="truncate text-xs text-muted-foreground">{sighting.county}</p>
+        <p className="truncate text-xs text-muted-foreground">
+          {[sighting.city === "Unincorporated" ? null : sighting.city, sighting.county, sighting.state].filter(Boolean).join(", ")}
+        </p>
       </div>
 
       {/* Bottom: date + subId badges */}
@@ -131,7 +134,7 @@ function EmptyState({ daysBack }: { daysBack: number }) {
   );
 }
 
-// ─── Loading Skeleton ─────────────────────────────────────────────────────────
+// ─── Loading Skeleton (used for subsequent tab-switch reloads) ────────────────
 
 function LoadingGrid() {
   return (
@@ -207,10 +210,12 @@ export default function LivePage() {
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const { load, data, isLoading, error } = useLiveSightings();
   const gridRef = useRef<HTMLDivElement>(null);
-  const stateRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const stateRefs = useRef<Record<string, HTMLElement | null>>({});
+  // Track whether this is the very first load so we show the full-page spinner.
+  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
-    load(daysBack);
+    load(daysBack).then(() => setInitialLoad(false)).catch(() => setInitialLoad(false));
   }, [load, daysBack]);
 
   // Ordered list of states with per-state sighting counts
@@ -248,7 +253,13 @@ export default function LivePage() {
   const isEmpty = !isLoading && !error && Object.keys(data).length === 0;
 
   return (
-    <main className="relative flex flex-col overflow-hidden" style={{ height: "calc(100vh - 44px)" }}>
+    <motion.main
+      className="relative flex flex-col overflow-hidden"
+      style={{ height: "calc(100vh - 44px)" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
       {/* Faded background image */}
       <div className="pointer-events-none fixed inset-0 z-0">
         <Image
@@ -300,6 +311,7 @@ export default function LivePage() {
           <Tabs
             value={String(daysBack)}
             onValueChange={(v) => {
+              setInitialLoad(true);
               setDaysBack(Number(v) as (typeof DAYS_OPTIONS)[number]);
               setSelectedState(null);
             }}
@@ -359,7 +371,20 @@ export default function LivePage() {
             </div>
           )}
 
-          {isLoading && (
+          {isLoading && initialLoad && (
+            <motion.div
+              key="bird-spinner"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex h-full w-full items-center justify-center"
+            >
+              <BirdSpinner size="lg" label="Scanning for sightings…" />
+            </motion.div>
+          )}
+
+          {isLoading && !initialLoad && (
             <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
               <LoadingGrid />
             </div>
@@ -372,7 +397,7 @@ export default function LivePage() {
           )}
 
           {!isLoading && !error && !isEmpty && (
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" initial={true}>
               <div key={`${daysBack}-${selectedState ?? "all"}`} className="p-4 space-y-6">
                 {visibleStates.map(([state, sightings]) => (
                   <section
@@ -407,6 +432,5 @@ export default function LivePage() {
           )}
         </div>
       </div>
-    </main>
-  );
+    </motion.main>  );
 }

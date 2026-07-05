@@ -8,6 +8,7 @@ const API_BASE = getApiBaseUrl();
 
 export interface LiveSighting {
   location: string;
+  city: string;
   county: string;
   state: string;
   date: string;
