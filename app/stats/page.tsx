@@ -17,8 +17,9 @@ import {
 } from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BarChart2, Map, MapPin, Bird, RefreshCw } from "lucide-react";
+import { ArrowLeft, BarChart2, Map, MapPin, RefreshCw } from "lucide-react";
 import { SiteNav } from "@/components/site-nav";
+import { BirdLoadingSpinner } from "@/components/bird-loading-spinner";
 import {
   useAnnualSummary,
   useStateStats,
@@ -38,17 +39,10 @@ const chartConfig: ChartConfig = {
 
 function LoadingState({ message = "Loading data…" }: { message?: string }) {
   return (
-    <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-xl border border-border bg-card">
-      <div className="relative">
-        <div className="h-14 w-14 animate-spin rounded-full border-4 border-sky-200 border-t-sky-500" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="rounded-full bg-sky-100 p-1.5">
-            <Bird className="h-5 w-5 animate-pulse text-sky-600" />
-          </div>
-        </div>
-      </div>
-      <p className="text-sm text-muted-foreground">{message}</p>
-    </div>
+    <BirdLoadingSpinner
+      message={message}
+      className="h-64 rounded-xl border border-border bg-card"
+    />
   );
 }
 

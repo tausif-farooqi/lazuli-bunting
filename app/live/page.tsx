@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Crown, Binoculars, Radio } from "lucide-react";
 import Image from "next/image";
 import { SiteNav } from "@/components/site-nav";
-import { BirdSpinner } from "@/components/bird-spinner";
+import { BirdLoadingSpinner } from "@/components/bird-loading-spinner";
+
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -380,7 +381,7 @@ export default function LivePage() {
               transition={{ duration: 0.3 }}
               className="flex h-full w-full items-center justify-center"
             >
-              <BirdSpinner size="lg" label="Scanning for sightings…" />
+              <BirdLoadingSpinner message="Scanning for sightings…" />
             </motion.div>
           )}
 
